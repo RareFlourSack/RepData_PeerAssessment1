@@ -33,7 +33,7 @@ total_steps <- aggregate(steps ~ date, steps_data, sum)
 We then create a histogram to illustrate the frequency of steps taken.
 
 ```
-hist(total_steps$steps, breaks = 20, xlab = "No. of Steps Taken", main = "Total No. of Steps Per Day", family = "serif")
+print(hist(total_steps$steps, breaks = 20, xlab = "No. of Steps Taken", main = "Total No. of Steps Per Day", family = "serif"))
 ```
 
 Finally, we get the mean and median of the total steps taken per day.
@@ -57,7 +57,7 @@ mean_steps_interval <- aggregate(steps ~ interval, steps_data, mean)
 We then create a time-series plot with the given data.
 
 ```
-plot(x = mean_steps_interval$interval, y = mean_steps_interval$steps, type = "l", main = "Average Steps Taken Per Interval", xlab = "No. of Steps", ylab = "Intervals in 5 Minutes", lwd = 1.5, family = "serif")
+print(plot(x = mean_steps_interval$interval, y = mean_steps_interval$steps, type = "l", main = "Average Steps Taken Per Interval", xlab = "No. of Steps", ylab = "Intervals in 5 Minutes", lwd = 1.5, family = "serif"))
 ```
 
 Finally, we find the interval with the highest number of steps taken.
@@ -97,7 +97,7 @@ We once again group the data per day then create the histogram.
 
 ```
 imput_total_steps_day <- aggregate(steps ~ date, imput_data, sum)
-hist(imput_total_steps_day$steps, breaks = 20, xlab = "No. of Steps Taken", main = "Total No. of Steps Per Day With Replaced NA Values", family = "serif")
+print(hist(imput_total_steps_day$steps, breaks = 20, xlab = "No. of Steps Taken", main = "Total No. of Steps Per Day With Replaced NA Values", family = "serif"))
 ```
 
 Next, we calculate the mean and median values.
@@ -142,10 +142,10 @@ Finally, we can create the panel plot.
 
 ```
 par(mfrow = c(2, 1))
-plot(weekdays_mean$interval, weekdays_mean$steps, type = "l",
+print(plot(weekdays_mean$interval, weekdays_mean$steps, type = "l",
      main = "Time Series Plot of Average Steps Taken per Interval for Weekdays",
-     xlab = "Intervals", ylab = "Number of Steps")
-plot(weekends_mean$interval, weekends_mean$steps, type = "l",
+     xlab = "Intervals", ylab = "Number of Steps"))
+print(plot(weekends_mean$interval, weekends_mean$steps, type = "l",
      main = "Time Series Plot of Average Steps Taken per Interval for Weekends",
-     xlab = "Intervals", ylab = "Number of Steps")
+     xlab = "Intervals", ylab = "Number of Steps"))
 ```
