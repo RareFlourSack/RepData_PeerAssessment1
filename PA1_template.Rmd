@@ -3,23 +3,149 @@ title: "Reproducible Research: Peer Assessment 1"
 output: 
   html_document:
     keep_md: true
+    echo: true
 ---
 
 
 ## Loading and preprocessing the data
 
+First, we unzip the file and store it.
 
+```
+activity_data <- unzip("./activity.zip", exdir = "./Data")
+fin_data <- read.csv("./Data/activity.csv")
+```
 
 ## What is mean total number of steps taken per day?
 
+We first remove the NA values.
 
+```
+steps_data <- fin_data[!(is.na(fin_data$steps)),]
+```
+
+We then get the total steps per day.
+
+```
+total_steps <- aggregate(steps ~ date, steps_data, sum)
+```
+
+We then create a histogram to illustrate the frequency of steps taken.
+
+```
+hist(total_steps$steps, breaks = 20, xlab = "No. of Steps Taken", main = "Total No. of Steps Per Day", family = "serif")
+```
+
+Finally, we get the mean and median of the total steps taken per day.
+
+```
+library(dplyr)
+steps_summary <- summarize(total_steps, mean_steps = mean(total_steps$steps), median_steps = median(total_steps$steps))
+print(steps_summary)
+```
+
+Here, we can see that the mean is _10766.19_ and the median is _10765_.
 
 ## What is the average daily activity pattern?
 
+We get the mean of the steps within the given intervals.
 
+```
+mean_steps_interval <- aggregate(steps ~ interval, steps_data, mean)
+```
+
+We then create a time-series plot with the given data.
+
+```
+plot(x = mean_steps_interval$interval, y = mean_steps_interval$steps, type = "l", main = "Average Steps Taken Per Interval", xlab = "No. of Steps", ylab = "Intervals in 5 Minutes", lwd = 1.5, family = "serif")
+```
+
+Finally, we find the interval with the highest number of steps taken.
+
+```
+mean_steps_interval[grep(max(mean_steps_interval$steps), mean_steps_interval$steps),]
+```
+
+Here, we can see that the interval with the highest number of steps is interval _835_.
 
 ## Imputing missing values
 
+We first find the NA values in the dataset.
 
+```
+anyNA(fin_data)
+```
+
+Next, we find which variables have NA values.
+
+```
+data.frame(steps = sum(is.na(fin_data$steps)), date = sum(is.na(fin_data$date)), interval = sum(is.na(fin_data$interval)))
+```
+
+From here, we can see that all NA values are in the steps variable, and there are 2304 NA values. We can replace these NA values with the mean value for that interval.
+
+```
+imput_data <- fin_data
+for (x in 1:17568) {
+  if(is.na(fin_data[x, 1] == TRUE)) {
+    imput_data[x, 1] <- mean_steps_interval[mean_steps_interval$interval %in% imput_data[x, 3], 2]
+  }
+}
+```
+
+We once again group the data per day then create the histogram.
+
+```
+imput_total_steps_day <- aggregate(steps ~ date, imput_data, sum)
+hist(imput_total_steps_day$steps, breaks = 20, xlab = "No. of Steps Taken", main = "Total No. of Steps Per Day With Replaced NA Values", family = "serif")
+```
+
+Next, we calculate the mean and median values.
+
+```
+imput_total_steps_day_summary <- summarize(imput_total_steps_day, mean_imput_total_steps_day = mean(imput_total_steps_day$steps), median_imput_total_steps_day = median(imput_total_steps_day$steps))
+print(imput_total_steps_day_summary)
+```
+
+The mean value for both datasets are the same at _10766.19_, while the median for the imputed dataset is also _10766.19_ rather than  _10765_. It can be observed that this is the same value as that of the mean. It should be noted that less days are accounted for in the non-imputed dataset, which affected its mean and median values.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```
+days_data <- imput_data
+days_data$days <- weekdays(as.Date(imput_data$date))
+days_data$weekdays <- as.character(rep(0, 17568))
+for (x in 1:17568) {
+    if(days_data[x, 4] %in% c("Saturday", "Sunday")) {
+        days_data[x, 5] <- "weekend"
+    } else {
+        days_data[x, 5] <- "weekday"
+    }
+}
+```
+
+We then separate the data for weekdays and weekends.
+
+```
+weekdays_data <- days_data[days_data$weekdays == "weekday",]
+weekends_data <- days_data[days_data$weekdays == "weekend",]
+```
+
+Next, we get the mean for both.
+
+```
+weekdays_mean <- aggregate(steps ~ interval, weekdays_data, mean)
+weekends_mean <- aggregate(steps ~ interval, weekends_data, mean)
+```
+
+Finally, we can create the panel plot.
+
+```
+par(mfrow = c(2, 1))
+plot(weekdays_mean$interval, weekdays_mean$steps, type = "l",
+     main = "Time Series Plot of Average Steps Taken per Interval for Weekdays",
+     xlab = "Intervals", ylab = "Number of Steps")
+plot(weekends_mean$interval, weekends_mean$steps, type = "l",
+     main = "Time Series Plot of Average Steps Taken per Interval for Weekends",
+     xlab = "Intervals", ylab = "Number of Steps")
+```
