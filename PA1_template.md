@@ -10,7 +10,8 @@ output:
 
 First, we unzip the file and store it.
 
-```
+
+``` r
 activity_data <- unzip("./activity.zip", exdir = "./Data")
 fin_data <- read.csv("./Data/activity.csv")
 ```
@@ -19,28 +20,59 @@ fin_data <- read.csv("./Data/activity.csv")
 
 We first remove the NA values.
 
-```
+
+``` r
 steps_data <- fin_data[!(is.na(fin_data$steps)),]
 ```
 
 We then get the total steps per day.
 
-```
+
+``` r
 total_steps <- aggregate(steps ~ date, steps_data, sum)
 ```
 
 We then create a histogram to illustrate the frequency of steps taken.
 
-```
+
+``` r
 hist(total_steps$steps, breaks = 20, xlab = "No. of Steps Taken", main = "Total No. of Steps Per Day", family = "serif")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+
 Finally, we get the mean and median of the total steps taken per day.
 
-```
+
+``` r
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+``` r
 steps_summary <- summarize(total_steps, mean_steps = mean(total_steps$steps), median_steps = median(total_steps$steps))
 print(steps_summary)
+```
+
+```
+##   mean_steps median_steps
+## 1   10766.19        10765
 ```
 
 Here, we can see that the mean is _10766.19_ and the median is _10765_.
@@ -49,20 +81,30 @@ Here, we can see that the mean is _10766.19_ and the median is _10765_.
 
 We get the mean of the steps within the given intervals.
 
-```
+
+``` r
 mean_steps_interval <- aggregate(steps ~ interval, steps_data, mean)
 ```
 
 We then create a time-series plot with the given data.
 
-```
+
+``` r
 plot(x = mean_steps_interval$interval, y = mean_steps_interval$steps, type = "l", main = "Average Steps Taken Per Interval", xlab = "No. of Steps", ylab = "Intervals in 5 Minutes", lwd = 1.5, family = "serif")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+
 Finally, we find the interval with the highest number of steps taken.
 
-```
+
+``` r
 mean_steps_interval[grep(max(mean_steps_interval$steps), mean_steps_interval$steps),]
+```
+
+```
+##     interval    steps
+## 104      835 206.1698
 ```
 
 Here, we can see that the interval with the highest number of steps is interval _835_.
@@ -71,19 +113,31 @@ Here, we can see that the interval with the highest number of steps is interval 
 
 We first find the NA values in the dataset.
 
-```
+
+``` r
 anyNA(fin_data)
+```
+
+```
+## [1] TRUE
 ```
 
 Next, we find which variables have NA values.
 
-```
+
+``` r
 data.frame(steps = sum(is.na(fin_data$steps)), date = sum(is.na(fin_data$date)), interval = sum(is.na(fin_data$interval)))
+```
+
+```
+##   steps date interval
+## 1  2304    0        0
 ```
 
 From here, we can see that all NA values are in the steps variable, and there are 2304 NA values. We can replace these NA values with the mean value for that interval.
 
-```
+
+``` r
 imput_data <- fin_data
 for (x in 1:17568) {
   if(is.na(fin_data[x, 1] == TRUE)) {
@@ -94,23 +148,33 @@ for (x in 1:17568) {
 
 We once again group the data per day then create the histogram.
 
-```
+
+``` r
 imput_total_steps_day <- aggregate(steps ~ date, imput_data, sum)
 hist(imput_total_steps_day$steps, breaks = 20, xlab = "No. of Steps Taken", main = "Total No. of Steps Per Day With Replaced NA Values", family = "serif")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
+
 Next, we calculate the mean and median values.
 
-```
+
+``` r
 imput_total_steps_day_summary <- summarize(imput_total_steps_day, mean_imput_total_steps_day = mean(imput_total_steps_day$steps), median_imput_total_steps_day = median(imput_total_steps_day$steps))
 print(imput_total_steps_day_summary)
+```
+
+```
+##   mean_imput_total_steps_day median_imput_total_steps_day
+## 1                   10766.19                     10766.19
 ```
 
 The mean value for both datasets are the same at _10766.19_, while the median for the imputed dataset is also _10766.19_ rather than  _10765_. It can be observed that this is the same value as that of the mean. It should be noted that less days are accounted for in the non-imputed dataset, which affected its mean and median values.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```
+
+``` r
 days_data <- imput_data
 days_data$days <- weekdays(as.Date(imput_data$date))
 days_data$weekdays <- as.character(rep(0, 17568))
@@ -125,21 +189,24 @@ for (x in 1:17568) {
 
 We then separate the data for weekdays and weekends.
 
-```
+
+``` r
 weekdays_data <- days_data[days_data$weekdays == "weekday",]
 weekends_data <- days_data[days_data$weekdays == "weekend",]
 ```
 
 Next, we get the mean for both.
 
-```
+
+``` r
 weekdays_mean <- aggregate(steps ~ interval, weekdays_data, mean)
 weekends_mean <- aggregate(steps ~ interval, weekends_data, mean)
 ```
 
 Finally, we can create the panel plot.
 
-```
+
+``` r
 par(mfrow = c(2, 1))
 plot(weekdays_mean$interval, weekdays_mean$steps, type = "l",
      main = "Time Series Plot of Average Steps Taken per Interval for Weekdays",
@@ -148,3 +215,5 @@ plot(weekends_mean$interval, weekends_mean$steps, type = "l",
      main = "Time Series Plot of Average Steps Taken per Interval for Weekends",
      xlab = "Intervals", ylab = "Number of Steps")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
